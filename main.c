@@ -3,18 +3,16 @@
 //#include <SDL2/SDL_error.h>
 //#include <SDL2/SDL_timer.h>
 #include <stdlib.h>
-#include "colors.h"
+#include "game_loop.h"
+#include "tetris_types.h"
 
 int main(int argc, char* argv[]) {
 	// Screen size
-	const int BLOCK_SIZE    = 40;
+	const int BLOCK_SIZE    = 80;
 	const int SCREEN_WIDTH  = 10 * BLOCK_SIZE;
 	const int SCREEN_HEIGHT = 20 * BLOCK_SIZE;
 
-	//The window we'll be rendering to
 	SDL_Window* window = NULL;
-
-	//The surface contained by the window
 	SDL_Surface* screenSurface = NULL;
 
 	//Initialize SDL
@@ -35,13 +33,13 @@ int main(int argc, char* argv[]) {
 	screenSurface = SDL_GetWindowSurface(window);
 
 	// Fill the surface black
-	SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format,black.r,black.g,black.b));
+	SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format,0,0,0));
 
 	// Update the surface
 	SDL_UpdateWindowSurface(window);
 
-	// Wait two seconds
-	SDL_Delay(2000);
+	// Run the main game loop
+	int score = game_loop(screenSurface);
 
 	//Destroy window
 	SDL_DestroyWindow( window );

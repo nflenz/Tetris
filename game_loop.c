@@ -1,74 +1,79 @@
-#include <SDL2/SDL_Rect.h>
 #include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_events.h>
 #include <time.h>
+#include <stdbool.h>
+
+#include "tetris_types.h"
 #include "colors.h"
 
-typedef enum { down, left, right } direction;
-typedef enum { Bar, Square, T, L, Z, Reverse_L, Reverse_Z } piece_type;
-
-// The Tetris game field
-struct {
-	int filled;
-	SDL_Color color;
-} tetris_field[10][20];
-
-// The Tetris game piece
-struct piece {
-	int rotation;
-	piece_type type;
-	SDL_Color color;
-	// positions for the 4 blocks
-	// a is treated as the center
-	// except when it is a square
-	SDL_Rect a, b, c, d;
-} piece;
+block_t field[10][20];
+piece_t gamepiece;
 
 // Subroutine for drawing the screen
 void draw_field() {
 	// Draw the field
 	for (int x = 0; x < 10; x++)
 		for (int y = 0; y < 10; y++)
-			if (tetris_field[x][y].filled) { }
-	// Draw the piece too
+			if (field[x][y].filled) { }
+	// Draw the game piece too
 
 }
 
-struct piece new_piece() {
-	struct piece newpiece;
-	piece_type type = rand() % 7;
-	newpiece.type = type;
-	switch (type) {
+piece_t newpiece() {
+	piece_t newpiece;
+	newpiece.rotation = 0;
+	newpiece.type = rand() % 7;
+	switch (newpiece.type) {
 		case Bar:
-				newpiece.color = cyan;
+			newpiece.color = cyan;
 		case Square:
-				newpiece.color = yellow;
+			newpiece.color = yellow;
+			newpiece.x = 5;
+			newpiece.y = 20;
 		case T:
-				newpiece.color = purple;
+			newpiece.color = purple;
 		case L:
-				newpiece.color = orange;
+			newpiece.color = orange;
 		case Z:
-				newpiece.color = red;
+			newpiece.color = red;
 		case Reverse_L:
-				newpiece.color = blue;
+			newpiece.color = blue;
 		case Reverse_Z:
-				newpiece.color = red;
+			newpiece.color = green;
 	}
 	return newpiece;
 }
 
-int game_loop() {
+int game_loop(SDL_Surface* screenSurface) {
 	int score = 0;
 	int level = 1;
 	// The time in milliseconds before lowering the game piece
 	int speed = 1000;
+	gamepiece = newpiece();
 
 	// Initialize the game field
-	for (int x = 0; x < 10; x++)
-		for (int y = 0; y < 10; y++)
-			tetris_field[x][y] = {0, black};
+	for (int x = 9; x--;) for (int y = 19; y--;) {
+		field[x][y].filled = false;
+		field[x][y].color  = black;
+	}
 
-	while (true) {
-
+	for (bool quit = false; !quit;) {
+		SDL_Event event;
+		if (SDL_PollEvent(&event)) {
+			switch (event.type) { 
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym) {
+						case SDLK_DOWN:  puts("Down" ); break;
+						case SDLK_UP:    puts("Up"   ); break;
+						case SDLK_LEFT:  puts("Left" ); break;
+						case SDLK_RIGHT: puts("Right"); break;
+					}
+					break;
+				case SDL_QUIT:
+					quit = true;
+					break;
+			}
+		}
 	}
 
 	return score;
