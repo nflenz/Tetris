@@ -4,13 +4,9 @@
 //#include <SDL2/SDL_timer.h>
 #include <stdlib.h>
 #include "game_loop.h"
-#include "tetris_types.h"
+#include "types.h"
 
 int main(int argc, char* argv[]) {
-	// Screen size
-	const int BLOCK_SIZE    = 80;
-	const int SCREEN_WIDTH  = 10 * BLOCK_SIZE;
-	const int SCREEN_HEIGHT = 20 * BLOCK_SIZE;
 
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;
@@ -39,7 +35,7 @@ int main(int argc, char* argv[]) {
 	SDL_UpdateWindowSurface(window);
 
 	// Run the main game loop
-	int score = game_loop(screenSurface);
+	int score = game_loop(window, screenSurface);
 
 	//Destroy window
 	SDL_DestroyWindow( window );

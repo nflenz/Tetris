@@ -1,1 +1,1 @@
-extern int game_loop(SDL_Surface*);
+extern int game_loop(SDL_Window*, SDL_Surface*);
