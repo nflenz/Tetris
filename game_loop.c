@@ -12,32 +12,17 @@ SDL_Surface* surface;
 
 static void rotate() {
 	piece_t save = gamePiece;
-	switch (gamePiece.type) {
-		case SQUARE:
-			// There's no need to rotate a square
-			// Checkmate, geometry.
-			break;
-		case BAR:
-			if (gamePiece.rotation == 0) {
-				gamePiece.rotation = 1;
-				gamePiece.position[0].x += 2;
-				gamePiece.position[0].y -= 2;
-				gamePiece.position[1].x += 1;
-				gamePiece.position[1].y -= 1;
-				gamePiece.position[3].x -= 1;
-				gamePiece.position[3].y += 1;
-			}
-			else {
-				gamePiece.rotation = 0;
-				gamePiece.position[0].x -= 2;
-				gamePiece.position[0].y += 2;
-				gamePiece.position[1].x -= 1;
-				gamePiece.position[1].y += 1;
-				gamePiece.position[3].x += 1;
-				gamePiece.position[3].y -= 1;
-			}
-			break;
-	}
+	
+	//	2, -2,  1, -1,  0,  0, -1,  1
+	gamePiece.position[0].x += gamePiece.change[gamePiece.rotation][0];
+	gamePiece.position[0].y += gamePiece.change[gamePiece.rotation][1];
+	gamePiece.position[1].x += gamePiece.change[gamePiece.rotation][2];
+	gamePiece.position[1].y += gamePiece.change[gamePiece.rotation][3];
+	gamePiece.position[2].x += gamePiece.change[gamePiece.rotation][4];
+	gamePiece.position[2].y += gamePiece.change[gamePiece.rotation][5];
+	gamePiece.position[3].x += gamePiece.change[gamePiece.rotation][6];
+	gamePiece.position[3].y += gamePiece.change[gamePiece.rotation][7];
+	gamePiece.rotation = (gamePiece.rotation + 1) % 4;
 }
 
 static int removeLines() {
@@ -139,6 +124,7 @@ static void moveGamePiece(uint8_t xShift, uint8_t yShift) {
 				field[save.position[2].x][save.position[2].y] = save.color;
 				field[save.position[3].x][save.position[3].y] = save.color;
 				gamePiece = newPiece[rand() % SHAPE_COUNT];
+				gamePiece = newPiece[REVERSE_Z];
 				break;
 			}
 		}
@@ -152,6 +138,7 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	// The time in milliseconds before lowering the game piece
 	int speed = 1000;
 	gamePiece = newPiece[rand() % SHAPE_COUNT];
+	gamePiece = newPiece[REVERSE_Z];
 
 	for (bool quit = false; !quit;) {
 		SDL_Event event;
