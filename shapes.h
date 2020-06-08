@@ -22,11 +22,11 @@ typedef struct {
 
 // These are the values used when a new piece is spawned
 const piece_t newPiece[SHAPE_COUNT] = {
-	BAR,       0, CYAN   , 4, 0, 5, 0, 6, 0, 7, 0,
-	SQUARE,    0, YELLOW , 5, 0, 6, 0, 5, 1, 6, 1,
-	T,         0, PURPLE , 5, 0, 6, 0, 6, 1, 7, 0,
-	L,         0, ORANGE , 5, 0, 5, 1, 6, 0, 7, 0,
-	Z,         0, RED    , 5, 0, 6, 0, 6, 1, 7, 1,
-	REVERSE_L, 0, BLUE   , 5, 1, 6, 1, 6, 0, 7, 0,
-	REVERSE_Z, 0, GREEN  , 5, 1, 6, 1, 6, 0, 7, 0
+	BAR,       0, CYAN   , 3, 0, 4, 0, 5, 0, 6, 0,
+	SQUARE,    0, YELLOW , 4, 0, 5, 0, 4, 1, 5, 1,
+	T,         0, PURPLE , 4, 0, 5, 0, 5, 1, 6, 0,
+	L,         0, ORANGE , 4, 0, 4, 1, 5, 0, 6, 0,
+	Z,         0, RED    , 4, 0, 5, 0, 5, 1, 6, 1,
+	REVERSE_L, 0, BLUE   , 4, 0, 5, 0, 6, 0, 6, 1,
+	REVERSE_Z, 0, GREEN  , 4, 1, 5, 1, 5, 0, 6, 0
 };

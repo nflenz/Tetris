@@ -10,6 +10,76 @@ uint32_t field[10][20] = {BLACK};
 piece_t gamePiece;
 SDL_Surface* surface;
 
+static void rotate() {
+	piece_t save = gamePiece;
+	switch (gamePiece.type) {
+		case SQUARE:
+			// There's no need to rotate a square
+			// Checkmate, geometry.
+			break;
+		case BAR:
+			if (gamePiece.rotation == 0) {
+				gamePiece.rotation = 1;
+				gamePiece.position[0].x += 2;
+				gamePiece.position[0].y -= 2;
+				gamePiece.position[1].x += 1;
+				gamePiece.position[1].y -= 1;
+				gamePiece.position[3].x -= 1;
+				gamePiece.position[3].y += 1;
+			}
+			else {
+				gamePiece.rotation = 0;
+				gamePiece.position[0].x -= 2;
+				gamePiece.position[0].y += 2;
+				gamePiece.position[1].x -= 1;
+				gamePiece.position[1].y += 1;
+				gamePiece.position[3].x += 1;
+				gamePiece.position[3].y -= 1;
+			}
+			break;
+	}
+}
+
+static int removeLines() {
+	int score = 0;
+	int lines = 0; 
+
+	for (int y = 19; y > 0; y--) {
+		for (int x = 0; x < SCREEN_WIDTH; x++) {
+			if (!field[x][y])
+				break;
+			if (x == 9)
+				lines++;
+		}
+		if (y - lines >= 0) {
+			field[0][y] = field[0][y-lines];
+			field[1][y] = field[1][y-lines];
+			field[2][y] = field[2][y-lines];
+			field[3][y] = field[3][y-lines];
+			field[4][y] = field[4][y-lines];
+			field[5][y] = field[5][y-lines];
+			field[6][y] = field[6][y-lines];
+			field[7][y] = field[7][y-lines];
+			field[8][y] = field[8][y-lines];
+			field[9][y] = field[9][y-lines];
+		}
+		else {
+			field[0][y] = BLACK;
+			field[1][y] = BLACK;
+			field[2][y] = BLACK;
+			field[3][y] = BLACK;
+			field[4][y] = BLACK;
+			field[5][y] = BLACK;
+			field[6][y] = BLACK;
+			field[7][y] = BLACK;
+			field[8][y] = BLACK;
+			field[9][y] = BLACK;
+		}
+	}
+
+	return score;
+}
+
 static void drawField() {
 	SDL_Rect rect;
 	rect.h = BLOCK_SIZE;
@@ -89,17 +159,16 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 			switch (event.type) { 
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym) {
+						case SDLK_UP:    rotate();             break;
 						case SDLK_DOWN:  moveGamePiece( 0, 1); break;
-						case SDLK_UP:    moveGamePiece( 0,-1); break;
 						case SDLK_LEFT:  moveGamePiece(-1, 0); break;
 						case SDLK_RIGHT: moveGamePiece( 1, 0); break;
 					}
 					break;
-				case SDL_QUIT:
-					quit = true;
-					break;
+				case SDL_QUIT: quit = true; break;
 			}
 		}
+		score += removeLines();
 		drawField();
 		drawGamePiece();
 		SDL_UpdateWindowSurface (window);
