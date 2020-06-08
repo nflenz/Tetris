@@ -1,6 +1,6 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_events.h>
-#include <time.h>
+#include <sys/time.h>
 #include <stdbool.h>
 #include "types.h"
 #include "shapes.h"
@@ -124,7 +124,7 @@ static void moveGamePiece(uint8_t xShift, uint8_t yShift) {
 				field[save.position[2].x][save.position[2].y] = save.color;
 				field[save.position[3].x][save.position[3].y] = save.color;
 				gamePiece = newPiece[rand() % SHAPE_COUNT];
-				gamePiece = newPiece[REVERSE_Z];
+				//gamePiece = newPiece[REVERSE_Z];
 				break;
 			}
 		}
@@ -135,10 +135,14 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	surface = screenSurface;
 	int score = 0;
 	int level = 1;
-	// The time in milliseconds before lowering the game piece
-	int speed = 1000;
+
+	int speed = 1000000;
+	struct timeval now;
+	struct timeval start;
+	gettimeofday(&start, NULL);
+
 	gamePiece = newPiece[rand() % SHAPE_COUNT];
-	gamePiece = newPiece[REVERSE_Z];
+	//gamePiece = newPiece[REVERSE_Z];
 
 	for (bool quit = false; !quit;) {
 		SDL_Event event;
@@ -146,20 +150,39 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 			switch (event.type) { 
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym) {
-						case SDLK_UP:    rotate();             break;
-						case SDLK_DOWN:  moveGamePiece( 0, 1); break;
-						case SDLK_LEFT:  moveGamePiece(-1, 0); break;
-						case SDLK_RIGHT: moveGamePiece( 1, 0); break;
+						case SDLK_UP:    
+							rotate();
+							break;
+						case SDLK_DOWN:  
+							moveGamePiece( 0, 1); 
+							gettimeofday(&start, NULL);
+							break;
+						case SDLK_LEFT:  
+							moveGamePiece(-1, 0);
+							gettimeofday(&start, NULL);
+							break;
+						case SDLK_RIGHT: 
+							moveGamePiece( 1, 0); 
+							gettimeofday(&start, NULL);
+							break;
 					}
 					break;
 				case SDL_QUIT: quit = true; break;
 			}
+		}
+		gettimeofday(&now, NULL);
+		int64_t diff = (now.tv_sec * 1000000 + now.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);
+		if (diff > speed) {
+				moveGamePiece( 0, 1); 
+				gettimeofday(&start, NULL);
 		}
 		score += removeLines();
 		drawField();
 		drawGamePiece();
 		SDL_UpdateWindowSurface (window);
 	}
+
+	
 
 	return score;
 }
