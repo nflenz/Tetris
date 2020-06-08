@@ -154,11 +154,9 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 							break;
 						case SDLK_LEFT:  
 							moveGamePiece(-1, 0);
-							gettimeofday(&start, NULL);
 							break;
 						case SDLK_RIGHT: 
 							moveGamePiece( 1, 0); 
-							gettimeofday(&start, NULL);
 							break;
 					}
 					break;
