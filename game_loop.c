@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "types.h"
 #include "shapes.h"
+#include <stdio.h>
 
 // A section of the field is considered to be empty if it is black.
 uint32_t field[10][20] = {BLACK};
@@ -12,8 +13,6 @@ SDL_Surface* surface;
 
 static void rotate() {
 	piece_t save = gamePiece;
-	
-	//	2, -2,  1, -1,  0,  0, -1,  1
 	gamePiece.position[0].x += gamePiece.change[gamePiece.rotation][0];
 	gamePiece.position[0].y += gamePiece.change[gamePiece.rotation][1];
 	gamePiece.position[1].x += gamePiece.change[gamePiece.rotation][2];
@@ -28,49 +27,46 @@ static void rotate() {
 static int removeLines() {
 	int score = 0;
 	int lines = 0; 
+	int y;
+	
+	// Only up to 4 lines will ever be removed
+	// so we loop 4 times
+	for (int loops = 3; loops--;) {
+		for (y = 19; y > 0; y--) {
+			// Check to see if the row is filled
+			bool filled = ! (
+				!field[0][y] + !field[1][y] +
+				!field[2][y] + !field[3][y] +
+				!field[4][y] + !field[5][y] +
+				!field[6][y] + !field[7][y] +
+				!field[8][y] + !field[9][y]);
 
-	for (int y = 19; y > 0; y--) {
-		for (int x = 0; x < SCREEN_WIDTH; x++) {
-			if (!field[x][y])
-				break;
-			if (x == 9)
+			if (filled) {
 				lines++;
+				break;
+			}
 		}
-		if (y - lines >= 0) {
-			field[0][y] = field[0][y-lines];
-			field[1][y] = field[1][y-lines];
-			field[2][y] = field[2][y-lines];
-			field[3][y] = field[3][y-lines];
-			field[4][y] = field[4][y-lines];
-			field[5][y] = field[5][y-lines];
-			field[6][y] = field[6][y-lines];
-			field[7][y] = field[7][y-lines];
-			field[8][y] = field[8][y-lines];
-			field[9][y] = field[9][y-lines];
-		}
-		else {
-			field[0][y] = BLACK;
-			field[1][y] = BLACK;
-			field[2][y] = BLACK;
-			field[3][y] = BLACK;
-			field[4][y] = BLACK;
-			field[5][y] = BLACK;
-			field[6][y] = BLACK;
-			field[7][y] = BLACK;
-			field[8][y] = BLACK;
-			field[9][y] = BLACK;
+		for (;y > 0; y--) {
+			field[0][y] = field[0][y-1];
+			field[1][y] = field[1][y-1];
+			field[2][y] = field[2][y-1];
+			field[3][y] = field[3][y-1];
+			field[4][y] = field[4][y-1];
+			field[5][y] = field[5][y-1];
+			field[6][y] = field[6][y-1];
+			field[7][y] = field[7][y-1];
+			field[8][y] = field[8][y-1];
+			field[9][y] = field[9][y-1];
 		}
 	}
-
-	return score;
 }
 
 static void drawField() {
 	SDL_Rect rect;
 	rect.h = BLOCK_SIZE;
 	rect.w = BLOCK_SIZE;
-
-	for (int x = 0; x < 10; x++) for (int y = 0; y < 20; y++) {
+	for (int x = 0; x < 10; x++) 
+	for (int y = 0; y < 20; y++) {
 		rect.x = x * BLOCK_SIZE;
 		rect.y = y * BLOCK_SIZE;
 		SDL_FillRect(surface, &rect, field[x][y]);
@@ -78,11 +74,9 @@ static void drawField() {
 }
 
 static void drawGamePiece() {
-	static piece_t oldPosition;
 	SDL_Rect rect;
 	rect.h = BLOCK_SIZE;
 	rect.w = BLOCK_SIZE;
-
 	for (int i = 0; i < 4; i++) {
 		rect.x = gamePiece.position[i].x * BLOCK_SIZE;
 		rect.y = gamePiece.position[i].y * BLOCK_SIZE;
@@ -137,6 +131,7 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	int level = 1;
 
 	int speed = 1000000;
+	speed =  500000;
 	struct timeval now;
 	struct timeval start;
 	gettimeofday(&start, NULL);
@@ -176,6 +171,7 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 				moveGamePiece( 0, 1); 
 				gettimeofday(&start, NULL);
 		}
+
 		score += removeLines();
 		drawField();
 		drawGamePiece();
