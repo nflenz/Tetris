@@ -1,10 +1,7 @@
 #include <SDL2/SDL.h>
-//#include <SDL2/SDL_video.h>
-//#include <SDL2/SDL_error.h>
-//#include <SDL2/SDL_timer.h>
 #include <stdlib.h>
+#include "window.h"
 #include "game_loop.h"
-#include "types.h"
 
 int main(int argc, char* argv[]) {
 

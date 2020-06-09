@@ -1,12 +1,13 @@
-#include <SDL2/SDL_pixels.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL.h>
+//#include <SDL2/SDL_pixels.h>
+//#include <SDL2/SDL_events.h>
+//#include <SDL2/SDL_timer.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdbool.h>
-#include "types.h"
+#include "window.h"
+#include "colors.h"
 #include "shapes.h"
-#include <stdio.h>
 
 // A section of the field is considered to be empty if it is black.
 uint32_t field[10][20] = {BLACK};
