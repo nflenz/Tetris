@@ -1,6 +1,7 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_timer.h>
+#include <time.h>
 #include <sys/time.h>
 #include <stdbool.h>
 #include "types.h"
@@ -134,6 +135,9 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	struct timeval now;
 	struct timeval start;
 	gettimeofday(&start, NULL);
+
+	// Seed the random number generator
+	srand(time(NULL));
 
 	gamePiece = newPiece[rand() % SHAPE_COUNT];
 
