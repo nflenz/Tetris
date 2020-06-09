@@ -1,5 +1,6 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_timer.h>
 #include <sys/time.h>
 #include <stdbool.h>
 #include "types.h"
@@ -25,21 +26,21 @@ static void rotate() {
 }
 
 static int removeLines() {
-	int score = 0;
+	int points[5] = { 0, 40, 100, 300, 1200 };
 	int lines = 0; 
 	int y;
-	
 	// Only up to 4 lines will ever be removed
 	// so we loop 4 times
 	for (int loops = 3; loops--;) {
 		for (y = 19; y > 0; y--) {
 			// Check to see if the row is filled
+			// with a whole lotta nots
 			bool filled = ! (
-				!field[0][y] + !field[1][y] +
-				!field[2][y] + !field[3][y] +
-				!field[4][y] + !field[5][y] +
-				!field[6][y] + !field[7][y] +
-				!field[8][y] + !field[9][y]);
+			!field[0][y] + !field[1][y] +
+			!field[2][y] + !field[3][y] +
+			!field[4][y] + !field[5][y] +
+			!field[6][y] + !field[7][y] +
+			!field[8][y] + !field[9][y]);
 
 			if (filled) {
 				lines++;
@@ -59,6 +60,7 @@ static int removeLines() {
 			field[9][y] = field[9][y-1];
 		}
 	}
+	return points[lines];
 }
 
 static void drawField() {
@@ -84,7 +86,7 @@ static void drawGamePiece() {
 	}
 }
 
-static void moveGamePiece(uint8_t xShift, uint8_t yShift) {
+static void moveGamePiece(int xShift, int yShift) {
 	piece_t save = gamePiece;
 	gamePiece.position[0].x += xShift;
 	gamePiece.position[1].x += xShift;
@@ -94,31 +96,28 @@ static void moveGamePiece(uint8_t xShift, uint8_t yShift) {
 	gamePiece.position[1].y += yShift;
 	gamePiece.position[2].y += yShift;
 	gamePiece.position[3].y += yShift;
-
 	// Prevent the movement if moving sideways
 	if (xShift) {
 		for (int i = 0; i < 4; i++) {
-			uint8_t x = gamePiece.position[i].x;
-			uint8_t y = gamePiece.position[i].y;
+			int x = gamePiece.position[i].x;
+			int y = gamePiece.position[i].y;
 			if (x > 9 || field[x][y]) {
 				gamePiece = save;
 				return;
 			}
 		}
 	}
-
 	// Spawn a new piece if we hit the bottom
 	else if (yShift) {
 		for (int i = 0; i < 4; i++) {
-			uint8_t x = gamePiece.position[i].x;
-			uint8_t y = gamePiece.position[i].y;
+			int x = gamePiece.position[i].x;
+			int y = gamePiece.position[i].y;
 			if (y > 19 || field[x][y]) {
 				field[save.position[0].x][save.position[0].y] = save.color;
 				field[save.position[1].x][save.position[1].y] = save.color;
 				field[save.position[2].x][save.position[2].y] = save.color;
 				field[save.position[3].x][save.position[3].y] = save.color;
 				gamePiece = newPiece[rand() % SHAPE_COUNT];
-				//gamePiece = newPiece[REVERSE_Z];
 				break;
 			}
 		}
@@ -137,7 +136,6 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	gettimeofday(&start, NULL);
 
 	gamePiece = newPiece[rand() % SHAPE_COUNT];
-	//gamePiece = newPiece[REVERSE_Z];
 
 	for (bool quit = false; !quit;) {
 		SDL_Event event;
@@ -160,7 +158,9 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 							break;
 					}
 					break;
-				case SDL_QUIT: quit = true; break;
+				case SDL_QUIT: 
+					quit = true; 
+					break;
 			}
 		}
 		gettimeofday(&now, NULL);
@@ -169,14 +169,13 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 				moveGamePiece( 0, 1); 
 				gettimeofday(&start, NULL);
 		}
+		//speed = (speed * 9) / 10;
 
 		score += removeLines();
 		drawField();
 		drawGamePiece();
 		SDL_UpdateWindowSurface (window);
 	}
-
-	
 
 	return score;
 }
