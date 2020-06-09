@@ -14,7 +14,8 @@ uint32_t field[10][20] = {BLACK};
 piece_t gamePiece;
 SDL_Surface* surface;
 
-static void rotate() {
+static void rotate(int key) {
+	if (key != SDLK_UP) return;
 	piece_t save = gamePiece;
 	gamePiece.position[0].x += gamePiece.change[gamePiece.rotation][0];
 	gamePiece.position[0].y += gamePiece.change[gamePiece.rotation][1];
@@ -88,8 +89,14 @@ static void drawGamePiece() {
 	}
 }
 
-static void moveGamePiece(int xShift, int yShift) {
+static void moveGamePiece(int key) {
 	piece_t save = gamePiece;
+	int xShift = 0;
+	int yShift = 0;
+	if (key == SDLK_DOWN ) yShift++;
+	if (key == SDLK_LEFT ) xShift--;
+	if (key == SDLK_RIGHT) xShift++;
+
 	gamePiece.position[0].x += xShift;
 	gamePiece.position[1].x += xShift;
 	gamePiece.position[2].x += xShift;
@@ -132,7 +139,6 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	int level = 1;
 
 	int speed = 1000000;
-	speed =  500000;
 	struct timeval now;
 	struct timeval start;
 	gettimeofday(&start, NULL);
@@ -145,33 +151,17 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	for (bool quit = false; !quit;) {
 		SDL_Event event;
 		if (SDL_PollEvent(&event)) {
-			switch (event.type) { 
-				case SDL_KEYDOWN:
-					switch (event.key.keysym.sym) {
-						case SDLK_UP:    
-							rotate();
-							break;
-						case SDLK_DOWN:  
-							moveGamePiece( 0, 1); 
-							gettimeofday(&start, NULL);
-							break;
-						case SDLK_LEFT:  
-							moveGamePiece(-1, 0);
-							break;
-						case SDLK_RIGHT: 
-							moveGamePiece( 1, 0); 
-							break;
-					}
-					break;
-				case SDL_QUIT: 
-					quit = true; 
-					break;
+			if (event.type == SDL_KEYDOWN) { 
+				moveGamePiece(event.key.keysym.sym);
+				rotate(event.key.keysym.sym);
 			}
+			else if (event.type == SDL_QUIT)
+				quit = true;
 		}
 		gettimeofday(&now, NULL);
 		int64_t diff = (now.tv_sec * 1000000 + now.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);
 		if (diff > speed) {
-				moveGamePiece( 0, 1); 
+				moveGamePiece(SDLK_DOWN); 
 				gettimeofday(&start, NULL);
 		}
 		//speed = (speed * 9) / 10;
