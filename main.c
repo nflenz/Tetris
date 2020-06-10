@@ -1,9 +1,13 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
+#include <time.h>
+#include <stdlib.h>
 #include "window.h"
 #include "game_loop.h"
 
 int main(int argc, char* argv[]) {
+	// Seed the random number generator
+	srand(time(NULL));
 
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;

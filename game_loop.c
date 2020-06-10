@@ -12,7 +12,10 @@
 // A section of the field is considered to be empty if it is black.
 uint32_t field[10][20] = {BLACK};
 piece_t gamePiece;
+piece_t dropPiece;
 SDL_Surface* surface;
+
+static void moveDropPiece(void);
 
 static void rotate(int key) {
 	if (key != SDLK_UP) return;
@@ -26,6 +29,7 @@ static void rotate(int key) {
 	gamePiece.position[3].x += gamePiece.change[gamePiece.rotation][6];
 	gamePiece.position[3].y += gamePiece.change[gamePiece.rotation][7];
 	gamePiece.rotation = (gamePiece.rotation + 1) % 4;
+	moveDropPiece();
 }
 
 static int removeLines() {
@@ -78,14 +82,38 @@ static void drawField() {
 	}
 }
 
-static void drawGamePiece() {
+static void drawGamePiece(piece_t drawTarget) {
 	SDL_Rect rect;
 	rect.h = BLOCK_SIZE;
 	rect.w = BLOCK_SIZE;
 	for (int i = 0; i < 4; i++) {
-		rect.x = gamePiece.position[i].x * BLOCK_SIZE;
-		rect.y = gamePiece.position[i].y * BLOCK_SIZE;
-		SDL_FillRect(surface, &rect, gamePiece.color);
+		rect.x = drawTarget.position[i].x * BLOCK_SIZE;
+		rect.y = drawTarget.position[i].y * BLOCK_SIZE;
+		SDL_FillRect(surface, &rect, drawTarget.color);
+	}
+}
+
+static void moveDropPiece() {
+	piece_t save;
+	dropPiece = gamePiece;
+	dropPiece.color = WHITE;
+
+	while (true) {
+		save = dropPiece;
+		dropPiece.position[0].y++;
+		dropPiece.position[1].y++;
+		dropPiece.position[2].y++;
+		dropPiece.position[3].y++;
+		for (int i = 0; i < 4; i++) {
+			int x = dropPiece.position[i].x;
+			int y = dropPiece.position[i].y;
+			if (field[x][y]) {
+				dropPiece = save;
+				return;
+			}
+			if (y == 19)
+				return;
+		}
 	}
 }
 
@@ -110,11 +138,12 @@ static void moveGamePiece(int key) {
 		for (int i = 0; i < 4; i++) {
 			int x = gamePiece.position[i].x;
 			int y = gamePiece.position[i].y;
-			if (x > 9 || field[x][y]) {
+			if (x > 9 || x < 0 || field[x][y]) {
 				gamePiece = save;
 				return;
 			}
 		}
+		moveDropPiece();
 	}
 	// Spawn a new piece if we hit the bottom
 	else if (yShift) {
@@ -127,11 +156,13 @@ static void moveGamePiece(int key) {
 				field[save.position[2].x][save.position[2].y] = save.color;
 				field[save.position[3].x][save.position[3].y] = save.color;
 				gamePiece = newPiece[rand() % SHAPE_COUNT];
+				moveDropPiece();
 				break;
 			}
 		}
 	}
 }
+
 
 int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	surface = screenSurface;
@@ -143,10 +174,8 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 	struct timeval start;
 	gettimeofday(&start, NULL);
 
-	// Seed the random number generator
-	srand(time(NULL));
-
 	gamePiece = newPiece[rand() % SHAPE_COUNT];
+	moveDropPiece();
 
 	for (bool quit = false; !quit;) {
 		SDL_Event event;
@@ -159,7 +188,8 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 				quit = true;
 		}
 		gettimeofday(&now, NULL);
-		int64_t diff = (now.tv_sec * 1000000 + now.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec);
+		int64_t diff = (now.tv_sec * 1000000 + now.tv_usec) 
+				- (start.tv_sec * 1000000 + start.tv_usec);
 		if (diff > speed) {
 				moveGamePiece(SDLK_DOWN); 
 				gettimeofday(&start, NULL);
@@ -168,7 +198,8 @@ int game_loop(SDL_Window* window, SDL_Surface* screenSurface) {
 
 		score += removeLines();
 		drawField();
-		drawGamePiece();
+		drawGamePiece(dropPiece);
+		drawGamePiece(gamePiece);
 		SDL_UpdateWindowSurface (window);
 	}
 
