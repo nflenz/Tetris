@@ -29,6 +29,15 @@ static void rotate(int key) {
 	gamePiece.position[3].x += gamePiece.change[gamePiece.rotation][6];
 	gamePiece.position[3].y += gamePiece.change[gamePiece.rotation][7];
 	gamePiece.rotation = (gamePiece.rotation + 1) % 4;
+
+	for (int i = 0; i < 4; i++) {
+		int x = gamePiece.position[i].x;
+		int y = gamePiece.position[i].y;
+		if (field[x][y] || y < 0 || x < 0 || y >= SCREEN_HEIGHT || x >= SCREEN_WIDTH) {
+			gamePiece = save;
+			return;
+		}
+	}
 	moveDropPiece();
 }
 
@@ -67,6 +76,7 @@ static int removeLines() {
 			field[9][y] = field[9][y-1];
 		}
 	}
+	moveDropPiece();
 	return points[lines];
 }
 
